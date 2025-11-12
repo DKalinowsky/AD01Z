@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Misja: Agentka 00Z</title>
+    <title>Misja: Agentka AD01Z</title>
     
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS (NAPRAWIONY LINK) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Google Fonts -->
@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     
-    <!-- Custom Styles (Paleta "Starych Akt" + Style Modala) -->
+    <!-- Custom Styles (Paleta "Starych Akt" + Style Modala + NOWY Preloader) -->
     <style>
         :root {
             /* Paleta kolorów - Motyw "Starych Akt" (brązy i beże) */
@@ -49,8 +49,7 @@
         }
         
         .hero-section {
-            /* ZMIEŃ '...' NA LINK DO WASZEGO ZDJĘCIA TŁA */
-            background-image: url('https://placehold.co/1920x1080/3a322f/A68F81?text=Wasze+Wspolne+Zdjecie'); 
+            background-color: #3a322f; 
             background-size: cover;
             background-position: center center;
             height: 100vh;
@@ -61,7 +60,6 @@
             background-color: rgba(58, 50, 47, 0.7); /* Ciemniejsza brązowa nakładka */
         }
         
-        /* Animacja pojawiania się */
         .reveal {
             opacity: 0;
             transform: translateY(30px);
@@ -76,7 +74,6 @@
             background-color: rgba(248, 245, 237, 0.8); /* Beżowe tło z przezroczystością */
         }
 
-        /* Nowe style dla Modala (Popup) */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -89,7 +86,6 @@
             justify-content: center;
             z-index: 1000;
             padding: 1rem;
-            /* Ukryty domyślnie */
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -124,227 +120,388 @@
         .modal-close-btn:hover {
             color: var(--color-heading);
         }
+
+        /* ================================================== */
+        /* NOWE STYLE DLA MODALA RAPORTÓW (POPUPÓW Z HISTORIĄ) */
+        /* ================================================== */
+        .modal-content-report {
+            position: relative;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            max-width: 48rem; /* 768px - szerszy dla zdjęć */
+            width: 100%;
+            background-color: var(--color-background);
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .modal-overlay:not(.hidden) .modal-content-report {
+            transform: scale(1);
+        }
+        .modal-report-image {
+            width: 100%;
+            height: 300px; /* Stała wysokość obrazu */
+            object-fit: cover;
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+            background-color: var(--color-text); /* Tło dla placeholderów */
+        }
+
+        /* ================================================== */
+        /* NOWE STYLE DLA PRELOADERA I ANIMACJI KŁÓDKI     */
+        /* ================================================== */
+        
+        /* Preloader (nakładka na całą stronę) */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--color-dark-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+        }
+
+        /* Kłódka SVG */
+        .padlock-svg {
+            width: 100px;
+            height: 100px;
+            stroke-width: 2;
+        }
+        .padlock-body {
+            fill: var(--color-accent);
+            stroke: var(--color-accent);
+        }
+        .padlock-shackle {
+            fill: none;
+            stroke: var(--color-accent);
+            stroke-linecap: round;
+            /* Punkt obrotu (ważne dla animacji) */
+            transform-origin: 30px 40px; 
+            /* Animacja 'unlock' trwa 0.5s, zaczyna się po 0.5s opóźnienia, zatrzymuje na końcu */
+            animation: unlock 0.5s ease-out 0.5s forwards;
+        }
+
+        /* Animacja otwierania kłódki */
+        @keyframes unlock {
+            0% {
+                transform: translateY(0) rotate(0);
+            }
+            50% {
+                transform: translateY(-15px) rotate(0); /* Podniesienie pałąka */
+            }
+            100% {
+                transform: translateY(-15px) rotate(-90deg); /* Obrót pałąka */
+            }
+        }
+
+        /* Kontener na główną treść (domyślnie ukryty) */
+        #main-content {
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+
     </style>
 </head>
 <body class="overflow-x-hidden">
 
-    <!-- Nawigacja -->
-    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm shadow-sm transition-all duration-300">
-        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
-            <a href="#home" class="font-stamp text-2xl tracking-wider text-[var(--color-heading)]">MISJA: 00Z</a>
-            <div class="hidden md:flex space-x-8 items-center text-sm tracking-widest uppercase">
-                <a href="#history" class="hover:text-[var(--color-accent)] transition-colors">Akta Misji</a>
+    <!-- ========================================================== -->
+    <!-- NOWY EKRAN ŁADOWANIA Z KŁÓDKĄ                          -->
+    <!-- ========================================================== -->
+    <div id="preloader">
+        <svg class="padlock-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- Pałąk (Shackle) - będzie animowany -->
+            <path class="padlock-shackle" 
+                  d="M 30 40 V 25 C 30 15 40 5 50 5 C 60 5 70 15 70 25 V 40" />
+            <!-- Korpus kłódki (Body) -->
+            <path class="padlock-body" 
+                  d="M 20 40 H 80 V 90 H 20 V 40 Z M 50 65 A 5 5 0 1 0 50 75 A 5 5 0 1 0 50 65" />
+        </svg>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- GŁÓWNA TREŚĆ STRONY (teraz opakowana w #main-content)   -->
+    <!-- ========================================================== -->
+    <div id="main-content">
+
+        <!-- Nawigacja -->
+        <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm shadow-sm transition-all duration-300">
+            <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+                <a href="#home" class="font-stamp text-2xl tracking-wider text-[var(--color-heading)]">MISJA: "24"</a>
+                <div class="hidden md:flex space-x-8 items-center text-sm tracking-widest uppercase">
+                    <a href="#history" class="hover:text-[var(--color-accent)] transition-colors">Akta Misji</a>
+                    <!-- Ten przycisk otwiera modal -->
+                    <a href="#" id="open-quiz-btn-nav" class="bg-[var(--color-heading)] text-white px-4 py-2 rounded-md hover:bg-[var(--color-accent)] transition-colors">WERYFIKACJA</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="menu-btn" class="text-[var(--color-heading)] focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <!-- Mobilne menu -->
+            <div id="mobile-menu" class="hidden md:hidden flex-col items-center py-4 space-y-4 bg-[rgba(248,245,237,0.95)]">
+                <a href="#history" class="block hover:text-[var(--color-accent)] transition-colors">Akta Misji</a>
                 <!-- Ten przycisk otwiera modal -->
-                <a href="#" id="open-quiz-btn-nav" class="bg-[var(--color-heading)] text-white px-4 py-2 rounded-md hover:bg-[var(--color-accent)] transition-colors">WERYFIKACJA</a>
+                <a href="#" id="open-quiz-btn-mobile" class="block hover:text-[var(--color-accent)] transition-colors">WERYFIKACJA</a>
             </div>
-            <div class="md:hidden">
-                <button id="menu-btn" class="text-[var(--color-heading)] focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                </button>
-            </div>
-        </div>
-        <!-- Mobilne menu -->
-        <div id="mobile-menu" class="hidden md:hidden flex-col items-center py-4 space-y-4 bg-[rgba(248,245,237,0.95)]">
-            <a href="#history" class="block hover:text-[var(--color-accent)] transition-colors">Akta Misji</a>
-            <!-- Ten przycisk otwiera modal -->
-            <a href="#" id="open-quiz-btn-mobile" class="block hover:text-[var(--color-accent)] transition-colors">WERYFIKACJA</a>
-        </div>
-    </nav>
+        </nav>
 
-    <main>
-        <!-- Sekcja Główna (Hero) -->
-        <section id="home" class="hero-section flex items-center justify-center text-center text-white pb-20">
-            <div class="hero-overlay absolute inset-0"></div>
-            <div class="relative z-10 p-4">
-                <h2 class="text-2xl md:text-3xl tracking-widest uppercase reveal font-mono">MISJA ROZPOCZĘTA</h2>
-                <h1 class="font-serif text-6xl md:text-8xl lg:text-9xl my-4 reveal" style="transition-delay: 0.2s;">Agentka 00Z</h1>
-                <p class="text-2xl md:text-3xl tracking-wide my-6 reveal max-w-2xl mx-auto" style="transition-delay: 0.4s;">
-                    Twoje zadanie, jeśli zdecydujesz się je przyjąć, właśnie się rozpoczęło.
-                </p>
-                <a href="#history" class="mt-8 inline-block bg-[var(--color-accent)] text-white px-8 py-4 rounded-md text-lg uppercase font-bold tracking-widest hover:bg-[var(--color-heading)] transition-colors reveal" style="transition-delay: 0.6s;">
-                    Przeglądaj akta
-                </a>
-            </div>
-        </section>
-
-        <!-- Sekcja "Nasza Historia" -->
-        <section id="history" class="py-20 md:py-32 bg-white/50">
-            <div class="container mx-auto px-6 max-w-6xl">
-                <div class="text-center mb-16">
-                    <h2 class="font-serif text-5xl md:text-6xl mb-4 reveal">Akta Misji: Nasza Historia</h2>
-                    <p class="reveal text-lg max-w-3xl mx-auto">
-                        Każdy moment ukształtował naszą misję. Przeanalizuj odtajnione raporty, aby przygotować się do finałowej weryfikacji.
+        <main>
+            <!-- Sekcja Główna (Hero) -->
+            <!-- ZMIEŃ 'background-image' w <style> na Wasze zdjęcie -->
+            <section id="home" class="hero-section flex items-center justify-center text-center text-white pb-20">
+                <div class="hero-overlay absolute inset-0"></div>
+                <div class="relative z-10 p-4">
+                    <h2 class="text-2xl md:text-3xl tracking-widest uppercase reveal font-mono">MISJA W TRAKCIE</h2>
+                    <h1 class="font-serif text-6xl md:text-8xl lg:text-9xl my-4 reveal" style="transition-delay: 0.2s;">Agentka AD01Z</h1>
+                    <p class="text-2xl md:text-3xl tracking-wide my-6 reveal max-w-2xl mx-auto" style="transition-delay: 0.4s;">
+                        Zbliżasz się do końca swojej misji. Ta strona pomoże Ci zlokalizować "przesyłkę" oraz uzyskać kod dostępu! Działaj szybko, czas leci Agentko AD01Z!!!
                     </p>
+                    <a href="#history" class="mt-8 inline-block bg-[var(--color-accent)] text-white px-8 py-4 rounded-md text-lg uppercase font-bold tracking-widest hover:bg-[var(--color-heading)] transition-colors reveal" style="transition-delay: 0.6s;">
+                        Przeglądaj akta
+                    </a>
                 </div>
-                
-                <!-- 
-                  ==========================================================
-                  TUTAJ WYPEŁNIJ WASZĄ HISTORIĘ W KAŻDYM KAFLU
-                  ==========================================================
-                -->
-                
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Raport 001 -->
-                    <div class="bg-[var(--color-background)] p-8 rounded-lg shadow-lg text-center reveal flex flex-col items-center justify-start">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[var(--color-heading)] mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25H5.625a2.25 2.25 0 01-2.25-2.25V18m12.75-3h.008v.008h-.008v-.008zm0-3h.008v.008h-.008v-.008zm0-3h.008v.008h-.008v-.008zm0-3h.008v.008h-.008v-.008zM12 18.75h.008v.008H12v-.008zm.375 0h.008v.008h-.008v-.008zm.375 0h.008v.008h-.008v-.008z" /></svg>
-                        <h3 class="text-2xl font-bold mt-2 text-[var(--color-heading)]">Raport 001: Pierwszy Kontakt</h3>
-                        <p class="text-sm opacity-80 mt-3 flex-grow">
-                            [Wstaw tutaj historię o tym, jak się poznaliście. Gdzie to było? Jakie były pierwsze wrażenia? Opisz ten moment jak raport z obserwacji.]
+            </section>
+
+            <!-- Sekcja "Nasza Historia" -->
+            <section id="history" class="py-20 md:py-32 bg-white/50">
+                <div class="container mx-auto px-6 max-w-6xl">
+                    <div class="text-center mb-16">
+                        <h2 class="font-serif text-5xl md:text-6xl mb-4 reveal">Akta Misji: Nasza Historia</h2>
+                        <p class="reveal text-lg max-w-3xl mx-auto">
+                            Każdy moment ukształtował naszą misję. Przeanalizuj odtajnione raporty, aby przygotować się do finałowej weryfikacji.
                         </p>
                     </div>
-                    <!-- Raport 002 -->
-                    <div class="bg-[var(--color-background)] p-8 rounded-lg shadow-lg text-center reveal flex flex-col items-center justify-start">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[var(--color-heading)] mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
-                        <h3 class="text-2xl font-bold mt-2 text-[var(--color-heading)]">Raport 002: Operacja "Randka"</h3>
-                        <p class="text-sm opacity-80 mt-3 flex-grow">
-                            [Opisz Waszą pierwszą randkę. Czy poszła zgodnie z planem? Jakiś śmieszny lub niezręczny moment, który teraz wspominacie z uśmiechem?]
-                        </p>
-                    </div>
-                    <!-- Raport 003 -->
-                    <div class="bg-[var(--color-background)] p-8 rounded-lg shadow-lg text-center reveal flex flex-col items-center justify-start">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[var(--color-heading)] mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.75A.75.75 0 013 4.5h.75m0 0H21m-12 6h.008v.008H9v-.008zm3 0h.008v.008H12v-.008zm3 0h.008v.008H15v-.008zm-3 3h.008v.008H12v-.008zm3 0h.008v.008H15v-.008zm3 0h.008v.008H18v-.008zm-3 3h.008v.008H12v-.008zm3 0h.008v.008H15v-.008zM3 9h18M3 6h18m0 0v1.5c0 .414-.336.75-.75.75H3.75A.75.75 0 013 7.5V6m0 0V4.5m0 1.5A.75.75 0 012.25 6V4.5m18 1.5v.75A.75.75 0 0120.25 9h-.75m0 0v-.75A.75.75 0 0120.25 6h.75z" /></svg>
-                        <h3 class="text-2xl font-bold mt-2 text-[var(--color-heading)]">Raport 003: Baza Operacyjna</h3>
-                        <p class="text-sm opacity-80 mt-3 flex-grow">
-                           [Napisz coś o Waszym wspólnym miejscu. Może pierwsze mieszkanie, ulubiona knajpka, miejsce, które jest "Wasze". Coś, co stało się Waszą bazą.]
-                        </p>
-                    </div>
-                    <!-- Raport 004 -->
-                    <div class="bg-[var(--color-background)] p-8 rounded-lg shadow-lg text-center reveal flex flex-col items-center justify-start">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[var(--color-heading)] mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 01-1.161.886l-.143.048a1.107 1.107 0 00-.57 1.664c.369.555.035 1.287-.672 1.287h-.612c-.707 0-1.04-.732-.672-1.287a1.107 1.107 0 00-.57-1.664l-.143-.048a2.25 2.25 0 01-1.161-.886l-.51-.766c-.32-1.021.03-2.114.692-2.82l.023-.023c.27-.29.366-.72.27-1.112l-.224-1.123c-.115-.572.27-1.156.845-1.32l1.18-.315c.574-.153 1.156.27 1.32.845l.224 1.123c.095.39-.0.82-.27 1.112l-.023.023c.662.706 1.012 1.799.692 2.82z" /></svg>
-                        <h3 class="text-2xl font-bold mt-2 text-[var(--color-heading)]">Raport 004: Wspólne Cele</h3>
-                        <p class="text-sm opacity-80 mt-3 flex-grow">
-                           [Co robicie razem? Jakie macie wspólne pasje, hobby? To może być cokolwiek – od oglądania seriali, przez gotowanie, po wspólne wycieczki rowerowe.]
-                        </p>
-                    </div>
-                    <!-- Raport 005 -->
-                    <div class="bg-[var(--color-background)] p-8 rounded-lg shadow-lg text-center reveal flex flex-col items-center justify-start">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[var(--color-heading)] mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
-                        <h3 class="text-2xl font-bold mt-2 text-[var(--color-heading)]">Raport 005: Potwierdzenie Sojuszu</h3>
-                        <p class="text-sm opacity-80 mt-3 flex-grow">
-                           [Wspomnij o momencie, który potwierdził, że to "to". Może to być decyzja o zaręczynach, wspólny wyjazd, adopcja zwierzaka lub ważna rozmowa.]
-                        </p>
-                    </div>
-                    <!-- Raport 006 -->
-                    <div class="bg-[var(--color-background)] p-8 rounded-lg shadow-lg text-center reveal flex flex-col items-center justify-start">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[var(--color-heading)] mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
-                        <h3 class="text-2xl font-bold mt-2 text-[var(--color-heading)]">Raport 006: Misja "Urodziny"</h3>
-                        <p class="text-sm opacity-80 mt-3 flex-grow">
-                            [Napisz coś o tej misji. "Agentka 00Z staje przed kolejnym wyzwaniem. Tylko jej spryt i znajomość akt pozwolą jej odblokować przesyłkę."]
-                        </p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        
+                        <!-- 
+                        ==========================================================
+                        TUTAJ EDYTUJ TREŚĆ RAPORTÓW
+                        - Zmień data-title="..."
+                        - Zmień data-description="[...]" na swój pełny opis
+                        - Zmień data-image="https://..." na link do Waszego zdjęcia
+                        ==========================================================
+                        -->
+
+                        <!-- Raport 001 -->
+                        <div class="report-trigger bg-[var(--color-background)] p-8 rounded-lg shadow-lg text-center reveal flex flex-col items-center justify-start cursor-pointer transition-all duration-300 hover:shadow-xl hover:transform hover:-translate-y-1"
+                             data-title="Raport 001: Pierwszy Kontakt"
+                             data-description="[Wstaw tutaj historię o tym, jak się poznaliście. Gdzie to było? Jakie były pierwsze wrażenia? Opisz ten moment jak raport z obserwacji.]"
+                             data-image="./2025-07-21 ANITA I DAWID_PRZYLASEK_full-16.jpg">
+                            
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[var(--color-heading)] mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25H5.625a2.25 2.25 0 01-2.25-2.25V18m12.75-3h.008v.008h-.008v-.008zm0-3h.008v.008h-.008v-.008zm0-3h.008v.008h-.008v-.008zm0-3h.008v.008h-.008v-.008zM12 18.75h.008v.008H12v-.008zm.375 0h.008v.008h-.008v-.008zm.375 0h.008v.008h-.008v-.008z" /></svg>
+                            <h3 class="text-2xl font-bold mt-2 text-[var(--color-heading)]">Raport 001: Pierwszy Kontakt</h3>
+                            <!-- Opis został przeniesiony do atrybutu data-description -->
+                        </div>
+                        <!-- Raport 002 -->
+                        <div class="report-trigger bg-[var(--color-background)] p-8 rounded-lg shadow-lg text-center reveal flex flex-col items-center justify-start cursor-pointer transition-all duration-300 hover:shadow-xl hover:transform hover:-translate-y-1"
+                             data-title="Raport 002: Operacja 'Randka'"
+                             data-description="[Opisz Waszą pierwszą randkę. Czy poszła zgodnie z planem? Jakiś śmieszny lub niezręczny moment, który teraz wspominacie z uśmiechem?]"
+                             data-image="https://placehold.co/800x600/584941/f8f5ed?text=Zdjecie+002">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[var(--color-heading)] mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
+                            <h3 class="text-2xl font-bold mt-2 text-[var(--color-heading)]">Raport 002: Operacja "Randka"</h3>
+                        </div>
+                        <!-- Raport 003 -->
+                        <div class="report-trigger bg-[var(--color-background)] p-8 rounded-lg shadow-lg text-center reveal flex flex-col items-center justify-start cursor-pointer transition-all duration-300 hover:shadow-xl hover:transform hover:-translate-y-1"
+                             data-title="Raport 003: Baza Operacyjna"
+                             data-description="[Napisz coś o Waszym wspólnym miejscu. Może pierwsze mieszkanie, ulubiona knajpka, miejsce, które jest 'Wasze'. Coś, co stało się Waszą bazą.]"
+                             data-image="https://placehold.co/800x600/584941/f8f5ed?text=Zdjecie+003">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[var(--color-heading)] mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.75A.75.75 0 013 4.5h.75m0 0H21m-12 6h.008v.008H9v-.008zm3 0h.008v.008H12v-.008zm3 0h.008v.008H15v-.008zm-3 3h.008v.008H12v-.008zm3 0h.008v.008H15v-.008zm3 0h.008v.008H18v-.008zm-3 3h.008v.008H12v-.008zm3 0h.008v.008H15v-.008zM3 9h18M3 6h18m0 0v1.5c0 .414-.336.75-.75.75H3.75A.75.75 0 013 7.5V6m0 0V4.5m0 1.5A.75.75 0 012.25 6V4.5m18 1.5v.75A.75.75 0 0120.25 9h-.75m0 0v-.75A.75.75 0 0120.25 6h.75z" /></svg>
+                            <h3 class="text-2xl font-bold mt-2 text-[var(--color-heading)]">Raport 003: Baza Operacyjna</h3>
+                        </div>
+                        <!-- Raport 004 -->
+                        <div class="report-trigger bg-[var(--color-background)] p-8 rounded-lg shadow-lg text-center reveal flex flex-col items-center justify-start cursor-pointer transition-all duration-300 hover:shadow-xl hover:transform hover:-translate-y-1"
+                             data-title="Raport 004: Wspólne Cele"
+                             data-description="[Co robicie razem? Jakie macie wspólne pasje, hobby? To może być cokolwiek – od oglądania seriali, przez gotowanie, po wspólne wycieczki rowerowe.]"
+                             data-image="https://placehold.co/800x600/584941/f8f5ed?text=Zdjecie+004">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[var(--color-heading)] mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 01-1.161.886l-.143.048a1.107 1.107 0 00-.57 1.664c.369.555.035 1.287-.672 1.287h-.612c-.707 0-1.04-.732-.672-1.287a1.107 1.107 0 00-.57-1.664l-.143-.048a2.25 2.25 0 01-1.161-.886l-.51-.766c-.32-1.021.03-2.114.692-2.82l.023-.023c.27-.29.366-.72.27-1.112l-.224-1.123c-.115-.572.27-1.156.845-1.32l1.18-.315c.574-.153 1.156.27 1.32.845l.224 1.123c.095.39-.0.82-.27 1.112l-.023.023c.662.706 1.012 1.799.692 2.82z" /></svg>
+                            <h3 class="text-2xl font-bold mt-2 text-[var(--color-heading)]">Raport 004: Potwierdzenie</h3>
+                        </div>
+                        <!-- Raport 005 -->
+                        <div class="report-trigger bg-[var(--color-background)] p-8 rounded-lg shadow-lg text-center reveal flex flex-col items-center justify-start cursor-pointer transition-all duration-300 hover:shadow-xl hover:transform hover:-translate-y-1"
+                             data-title="Raport 005: Potwierdzenie Sojuszu"
+                             data-description="[Wspomnij o momencie, który potwierdził, że to 'to'. Może to być decyzja o zaręczynach, wspólny wyjazd, adopcja zwierzaka lub ważna rozmowa.]"
+                             data-image="https://placehold.co/800x600/584941/f8f5ed?text=Zdjecie+005">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[var(--color-heading)] mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                            <h3 class="text-2xl font-bold mt-2 text-[var(--color-heading)]">Raport 005: Misja urodziny</h3>
+                        </div>
+                        <!-- Raport 006 -->
+                        <div class="report-trigger bg-[var(--color-background)] p-8 rounded-lg shadow-lg text-center reveal flex flex-col items-center justify-start cursor-pointer transition-all duration-300 hover:shadow-xl hover:transform hover:-translate-y-1"
+                             data-title="Raport 006: Misja 'Urodziny'"
+                             data-description="[Napisz coś o tej misji. 'Agentka AD01Z staje przed kolejnym wyzwaniem. Tylko jej spryt i znajomość akt pozwolą jej odblokować przesyłkę.']"
+                             data-image="https://placehold.co/800x600/584941/f8f5ed?text=Zdjecie+006">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[var(--color-heading)] mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                            <h3 class="text-2xl font-bold mt-2 text-[var(--color-heading)]">Raport 006: Ślub"</h3>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Sekcja "Weryfikacja" (przycisk otwierający modal) -->
-        <section id="verification" class="py-20 md:py-32 bg-[var(--color-dark-bg)] text-white">
-            <div class="container mx-auto px-6 max-w-3xl text-center">
-                <h2 class="text-5xl md:text-6xl mb-8 reveal text-[var(--color-accent)]">Weryfikacja Finałowa</h2>
-                <p class="text-lg leading-relaxed mb-12 reveal max-w-2xl mx-auto text-gray-300">
-                    Agentko, przeanalizowałaś akta. Wykonałaś zadania. Przed Tobą ostatni etap. 
-                    Tylko poprawne odpowiedzi na pytania bezpieczeństwa dadzą Ci kod dostępu do przesyłki.
-                </p>
-                <!-- Ten przycisk otwiera modal -->
-                <a href="#" id="open-quiz-btn-main" class="mt-8 inline-block bg-[var(--color-accent)] text-white px-10 py-5 rounded-md text-xl uppercase font-bold tracking-widest hover:bg-[var(--color-heading)] transition-colors reveal">
-                    Przejdź do Systemu Weryfikacji
-                </a>
-            </div>
-        </section>
-        
-    </main>
+            <!-- Sekcja "Weryfikacja" (przycisk otwierający modal) -->
+            <section id="verification" class="py-20 md:py-32 bg-[var(--color-dark-bg)] text-white">
+                <div class="container mx-auto px-6 max-w-3xl text-center">
+                    <h2 class="text-5xl md:text-6xl mb-8 reveal text-[var(--color-accent)]">Weryfikacja Finałowa</h2>
+                    <p class="text-lg leading-relaxed mb-12 reveal max-w-2xl mx-auto text-gray-300">
+                        Agentko, przeanalizowałaś akta. Wykonałaś zadania. Przed Tobą ostatni etap. 
+                        Tylko poprawne odpowiedzi na pytania bezpieczeństwa dadzą Ci kod dostępu do przesyłki.
+                    </p>
+                    <!-- Ten przycisk otwiera modal -->
+                    <a href="#" id="open-quiz-btn-main" class="mt-8 inline-block bg-[var(--color-accent)] text-white px-10 py-5 rounded-md text-xl uppercase font-bold tracking-widest hover:bg-[var(--color-heading)] transition-colors reveal">
+                        Przejdź do Systemu Weryfikacji
+                    </a>
+                </div>
+            </section>
+            
+        </main>
 
-    <!-- Stopka -->
-    <footer class="py-12 text-center bg-white/50">
-        <div class="container mx-auto px-6">
-            <p class="font-stamp text-3xl text-[var(--color-heading)]">Misja 00Z</p>
-            <p class="mt-2 text-sm opacity-70 tracking-widest">TRANSMISJA ZAKOŃCZONA</p>
-        </div>
-    </footer>
+        <!-- Stopka -->
+        <footer class="py-12 text-center bg-white/50">
+            <div class="container mx-auto px-6">
+                <p class="font-stamp text-3xl text-[var(--color-heading)]">Misja "24"</p>
+                <p class="mt-2 text-sm opacity-70 tracking-widest">TRANSMISJA ZAKOŃCZONA</p>
+            </div>
+        </footer>
+    
+    </div> <!-- Koniec #main-content -->
 
     
     <!-- ========================================================== -->
-    <!--          MODAL (POPUP) Z QUIZEM (poprzedni quiz.html)      -->
+    <!--           NOWY MODAL (POPUP) DLA RAPORTÓW                -->
     <!-- ========================================================== -->
-    <div id="quiz-modal" class="modal-overlay hidden">
+    <div id="report-modal" class="modal-overlay hidden">
         
-        <!-- Cała zawartość z quiz.html jest teraz tutaj -->
-        <div class="max-w-xl w-full bg-[var(--color-background)] rounded-lg shadow-2xl p-8 md:p-12 mx-auto modal-content">
+        <div class="modal-content-report">
+            <button id="report-modal-close-btn" class="modal-close-btn" aria-label="Zamknij">&times;</button>
             
-            <!-- Przycisk zamykania modala -->
-            <button id="close-modal-btn" class="modal-close-btn" aria-label="Zamknij">&times;</button>
-
-            <div class="text-center">
-                <h2 class="font-serif text-4xl md:text-5xl mb-4">System Weryfikacji</h2>
-                <p class="text-lg text-[var(--color-text)] mb-8">
-                    Agentko, wprowadź 4 cyfry kodu. Prawidłowe odpowiedzi na pytania bezpieczeństwa odblokują przesyłkę.
-                </p>
+            <img id="report-modal-image" src="" alt="Zdjęcie z raportu" class="modal-report-image">
+            
+            <div class="p-6 md:p-8">
+                <h3 id="report-modal-title" class="font-serif text-3xl md:text-4xl mb-4"></h3>
+                <p id="report-modal-description" class="text-base text-[var(--color-text)] leading-relaxed"></p>
             </div>
-
-            <!-- Formularz Quizu -->
-            <form id="quiz-form" class="space-y-6">
-                
-                <!-- 
-                  ==========================================================
-                  TUTAJ ZMIEŃ PYTANIA (w <label>)
-                  ==========================================================
-                -->
-
-                <div>
-                    <label for="q1" class="block text-sm font-bold text-[var(--color-text)] mb-2 uppercase tracking-wider">Pytanie 1: Ile pokoi ma nasze obecne mieszkanie?</label>
-                    <input type="text" id="q1" name="q1" maxlength="1" required 
-                           class="font-mono text-2xl w-full p-3 border-2 border-gray-300 rounded-md focus:border-[var(--color-heading)] focus:ring-1 focus:ring-[var(--color-heading)] transition">
-                </div>
-                
-                <div>
-                    <label for="q2" class="block text-sm font-bold text-[var(--color-text)] mb-2 uppercase tracking-wider">Pytanie 2: Którego dnia miesiąca (cyfra) po raz pierwszy powiedzieliśmy 'Kocham Cię'?</label>
-                    <input type="text" id="q2" name="q2" maxlength="1" required
-                           class="font-mono text-2xl w-full p-3 border-2 border-gray-300 rounded-md focus:border-[var(--color-heading)] focus:ring-1 focus:ring-[var(--color-heading)] transition">
-                </div>
-                
-                <div>
-                    <label for="q3" class="block text-sm font-bold text-[var(--color-text)] mb-2 uppercase tracking-wider">Pytanie 3: Ile mieliśmy wspólnych wyjazdów za granicę?</label>
-                    <input type="text" id="q3" name="q3" maxlength="1" required
-                           class="font-mono text-2xl w-full p-3 border-2 border-gray-300 rounded-md focus:border-[var(--color-heading)] focus:ring-1 focus:ring-[var(--color-heading)] transition">
-                </div>
-                
-                <div>
-                    <label for="q4" class="block text-sm font-bold text-[var(--color-text)] mb-2 uppercase tracking-wider">Pytanie 4: Jaka jest ostatnia cyfra roku, w którym się poznaliśmy?</label>
-                    <input type="text" id="q4" name="q4" maxlength="1" required
-                           class="font-mono text-2xl w-full p-3 border-2 border-gray-300 rounded-md focus:border-[var(--color-heading)] focus:ring-1 focus:ring-[var(--color-heading)] transition">
-                </div>
-
-                <button type="submit" class="w-full bg-[var(--color-heading)] text-white p-4 rounded-md text-xl uppercase font-bold tracking-widest hover:bg-[var(--color-accent)] transition-colors">
-                    Weryfikuj
-                </button>
-            </form>
-
-            <!-- Kontener na Wyniki -->
-            <div id="result-container" class="hidden text-center mt-8">
-                
-                <div id="access-granted" class="hidden">
-                    <p class="text-3xl font-bold text-green-600">DOSTĘP PRZYZNANY</p>
-                    <p class="text-lg text-[var(--color-text)] mt-2">Twój kod odblokowujący to:</p>
-                    <div id="final-code" class="font-mono text-6xl font-bold text-[var(--color-dark-bg)] bg-gray-200 p-6 rounded-lg mt-4 tracking-widest">
-                        <!-- Kod zostanie wstawiony tutaj -->
-                    </div>
-                </div>
-                
-                <div id="access-denied" class="hidden">
-                    <p class="text-3xl font-bold text-red-600">BŁĘDNA WERYFIKACJA</p>
-                    <p class="text-lg text-[var(--color-text)] mt-2">Dostęp odrzucony. Spróbuj ponownie.</p>
-                </div>
-
-            </div>
-
         </div>
+
     </div>
 
 
     <!-- ========================================================== -->
-    <!--           SKRYPTY (Połączona logika)                     -->
+    <!--          MODAL (POPUP) Z QUIZEM (POPRAWIONA POZYCJA)       -->
+    <!-- ========================================================== -->
+    <div id="quiz-modal" class="modal-overlay hidden">
+        
+        <div class="max-w-xl w-full bg-[var(--color-background)] rounded-lg shadow-2xl p-8 md:p-12 mx-auto modal-content">
+            
+            <button id="close-modal-btn" class="modal-close-btn" aria-label="Zamknij">&times;</button>
+
+            <div class="text-center">
+                    <h2 class="font-serif text-4xl md:text-5xl mb-4">System Weryfikacji</h2>
+                    <p class="text-lg text-[var(--color-text)] mb-8">
+                        Agentko, wprowadź 4 cyfry kodu. Prawidłowe odpowiedzi na pytania bezpieczeństwa odblokują przesyłkę.
+                    </p>
+                </div>
+
+                <!-- Formularz Quizu -->
+                <form id="quiz-form" class="space-y-6">
+                    
+                    <!-- 
+                    ==========================================================
+                    TUTAJ ZMIEŃ PYTANIA (w <label>)
+                    ==========================================================
+                    -->
+
+                    <div>
+                        <label for="q1" class="block text-sm font-bold text-[var(--color-text)] mb-2 uppercase tracking-wider">Pytanie 1: Ile pokoi ma nasze obecne mieszkanie?</label>
+                        <input type="text" id="q1" name="q1" maxlength="1" required 
+                               class="font-mono text-2xl w-full p-3 border-2 border-gray-300 rounded-md focus:border-[var(--color-heading)] focus:ring-1 focus:ring-[var(--color-heading)] transition">
+                    </div>
+                    
+                    <div>
+                        <label for="q2" class="block text-sm font-bold text-[var(--color-text)] mb-2 uppercase tracking-wider">Pytanie 2: Którego dnia miesiąca (cyfra) po raz pierwszy powiedzieliśmy 'Kocham Cię'?</label>
+                        <input type="text" id="q2" name="q2" maxlength="1" required
+                               class="font-mono text-2xl w-full p-3 border-2 border-gray-300 rounded-md focus:border-[var(--color-heading)] focus:ring-1 focus:ring-[var(--color-heading)] transition">
+                    </div>
+                    
+                    <div>
+                        <label for="q3" class="block text-sm font-bold text-[var(--color-text)] mb-2 uppercase tracking-wider">Pytanie 3: Ile mieliśmy wspólnych wyjazdów za granicę?</label>
+                        <input type="text" id="q3" name="q3" maxlength="1" required
+                               class="font-mono text-2xl w-full p-3 border-2 border-gray-300 rounded-md focus:border-[var(--color-heading)] focus:ring-1 focus:ring-[var(--color-heading)] transition">
+                    </div>
+                    
+                    <div>
+                        <label for="q4" class="block text-sm font-bold text-[var(--color-text)] mb-2 uppercase tracking-wider">Pytanie 4: Jaka jest ostatnia cyfra roku, w którym się poznaliśmy?</label>
+                        <input type="text" id="q4" name="q4" maxlength="1" required
+                               class="font-mono text-2xl w-full p-3 border-2 border-gray-300 rounded-md focus:border-[var(--color-heading)] focus:ring-1 focus:ring-[var(--color-heading)] transition">
+                    </div>
+
+                    <button type="submit" class="w-full bg-[var(--color-heading)] text-white p-4 rounded-md text-xl uppercase font-bold tracking-widest hover:bg-[var(--color-accent)] transition-colors">
+                        Weryfikuj
+                    </button>
+                </form>
+
+                <!-- Kontener na Wyniki -->
+                <div id="result-container" class="hidden text-center mt-8">
+                    
+                    <div id="access-granted" class="hidden">
+                        <p class="text-3xl font-bold text-green-600">DOSTĘP PRZYZNANY</p>
+                        <p class="text-lg text-[var(--color-text)] mt-2">Twój kod odblokowujący to:</p>
+                        <div id="final-code" class="font-mono text-6xl font-bold text-[var(--color-dark-bg)] bg-gray-200 p-6 rounded-lg mt-4 tracking-widest">
+                            <!-- Kod zostanie wstawiony tutaj -->
+                        </div>
+                    </div>
+                    
+                    <div id="access-denied" class="hidden">
+                        <p class="text-3xl font-bold text-red-600">BŁĘDNA WERYFIKACJA</p>
+                        <p class="text-lg text-[var(--color-text)] mt-2">Dostęp odrzucony. Spróbuj ponownie.</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    
+    
+    <!-- ========================================================== -->
+    <!--           SKRYPTY (Połączona logika + Preloader)         -->
     <!-- ========================================================== -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            
+            // ------------------------------------
+            // Część 0: Logika Preloadera (NOWA)
+            // ------------------------------------
+            const preloader = document.getElementById('preloader');
+            const mainContent = document.getElementById('main-content');
+            
+            // Czas, po jakim preloader zniknie (w milisekundach)
+            // Ustawiony na 2000ms (2 sekundy), aby dać czas na animację kłódki
+            const preloadTime = 2000; 
+
+            setTimeout(() => {
+                // Rozpocznij wygaszanie preleadera
+                preloader.style.opacity = '0';
+                preloader.style.visibility = 'hidden';
+                
+                // Rozpocznij pokazywanie głównej treści
+                mainContent.style.opacity = '1';
+                
+                // Całkowicie usuń preloader z widoku po zakończeniu animacji wygaszania
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                }, 500); // 500ms to czas trwania przejścia (transition) w CSS
+
+            }, preloadTime);
+
             
             // ------------------------------------
             // Część 1: Logika dla mobilnego menu
@@ -358,10 +515,8 @@
                 mobileMenu.classList.toggle('flex');
             });
 
-            // Zamykanie menu po kliknięciu w link (z wyjątkiem przycisków modala)
             navLinks.forEach(link => {
                 link.addEventListener('click', (e) => {
-                    // Jeśli to nie jest przycisk modala, zamknij menu
                     if (!link.id.includes('open-quiz-btn')) {
                         if (!mobileMenu.classList.contains('hidden')) {
                             mobileMenu.classList.add('hidden');
@@ -387,12 +542,50 @@
             });
 
             // ------------------------------------
+            // Część 2.5: Logika dla Modali Raportów (NOWA)
+            // ------------------------------------
+            const reportModal = document.getElementById('report-modal');
+            const reportModalCloseBtn = document.getElementById('report-modal-close-btn');
+            const reportModalImage = document.getElementById('report-modal-image');
+            const reportModalTitle = document.getElementById('report-modal-title');
+            const reportModalDescription = document.getElementById('report-modal-description');
+            const reportTriggers = document.querySelectorAll('.report-trigger');
+
+            const openReportModal = (trigger) => {
+                const title = trigger.dataset.title;
+                const description = trigger.dataset.description;
+                const imageSrc = trigger.dataset.image;
+
+                reportModalTitle.textContent = title;
+                reportModalDescription.textContent = description;
+                reportModalImage.src = imageSrc;
+                
+                reportModal.classList.remove('hidden');
+            };
+
+            const closeReportModal = () => {
+                reportModal.classList.add('hidden');
+            };
+
+            reportTriggers.forEach(trigger => {
+                trigger.addEventListener('click', () => openReportModal(trigger));
+            });
+
+            reportModalCloseBtn.addEventListener('click', closeReportModal);
+            
+            reportModal.addEventListener('click', (e) => {
+                if (e.target === reportModal) {
+                    closeReportModal();
+                }
+            });
+
+
+            // ------------------------------------
             // Część 3: Logika dla Modala (Quizu)
             // ------------------------------------
             const quizModal = document.getElementById('quiz-modal');
             const closeModalBtn = document.getElementById('close-modal-btn');
             
-            // Wszystkie przyciski, które otwierają modal
             const openModalBtns = [
                 document.getElementById('open-quiz-btn-nav'),
                 document.getElementById('open-quiz-btn-main'),
@@ -402,7 +595,6 @@
             const openModal = (e) => {
                 e.preventDefault();
                 quizModal.classList.remove('hidden');
-                // Zamknij mobilne menu, jeśli było otwarte
                 if (!mobileMenu.classList.contains('hidden')) {
                     mobileMenu.classList.add('hidden');
                     mobileMenu.classList.remove('flex');
@@ -419,7 +611,6 @@
             
             closeModalBtn.addEventListener('click', closeModal);
             
-            // Zamykanie po kliknięciu na tło (overlay)
             quizModal.addEventListener('click', (e) => {
                 if (e.target === quizModal) {
                     closeModal();
@@ -437,11 +628,11 @@
 
             // ==========================================================
             // TUTAJ ZMIEŃ POPRAWNE ODPOWIEDZI (jako tekst)
-            // ==========================================================
+            // =l=========================================================
             const correctAnswers = {
-                q1: "2",
-                q2: "5",
-                q3: "1",
+                q1: "4",
+                q2: "7",
+                q3: "2",
                 q4: "9"
             };
             
@@ -470,7 +661,7 @@
                     
                     accessGrantedMsg.classList.remove('hidden');
                     accessDeniedMsg.classList.add('hidden');
-                    quizForm.classList.add('hidden'); // Ukryj formularz po sukcesie
+                    quizForm.classList.add('hidden');
                 } else {
                     // PORAŻKA
                     accessDeniedMsg.classList.remove('hidden');
@@ -483,4 +674,3 @@
 
 </body>
 </html>
-
